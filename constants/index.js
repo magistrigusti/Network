@@ -15,6 +15,11 @@ export const sidebarLinks = [
       label: "Notifications",
     },
     {
+      imgURL: "/assets/messages.svg",
+      route: "/messages",
+      label: "Messages",
+    },
+    {
       imgURL: "/assets/tweet.svg",
       route: "/create-tweet",
       label: "Tweet",

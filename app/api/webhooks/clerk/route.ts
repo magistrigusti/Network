@@ -2,7 +2,7 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
-import { createUser, updateUser } from "@/lib/actions/user.actions";
+import { syncUserFromClerk } from "@/lib/actions/user.actions";
 import { 
   addMemberToGroup, createGroup, deleteGroup, removeUserFromGroup,
   updateGroupInfo
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
 
   if (evt.type === "user.created") {
     const user = evt.data;
-    await createUser({
+    await syncUserFromClerk({
       userId: user.id,
       email: user.email_addresses[0].email_address,
       name: `${user.first_name || ""} ${user.last_name || ""}`,
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
   };
   if (evt.type === "user.updated") {
     const user = evt.data;
-    await updateUser({
+    await syncUserFromClerk({
       userId: user.id,
       email: user.email_addresses[0].email_address,
       name: `${user.first_name || ""} ${user.last_name || ""}`,

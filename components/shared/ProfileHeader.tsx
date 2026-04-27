@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { Button } from "../ui/button"
 import { useRouter } from "next/navigation"
+import StartConversationButton from "../messages/StartConversationButton"
 
 interface Props {
   accountId: string,
@@ -51,6 +52,15 @@ const ProfileHeader = ({ accountId, authUserId, name, username, imgUrl, bio, typ
           }}>
             Edit profile
           </Button>
+        )}
+
+        {accountId !== authUserId && type === 'User' && (
+          <div className="mt-5">
+            <StartConversationButton
+              currentUserId={authUserId}
+              targetUserId={accountId}
+            />
+          </div>
         )}
 
       </div>

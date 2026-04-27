@@ -8,6 +8,7 @@ import LeftSideBar from "@/components/shared/LeftSideBar";
 import RightSideBar from "@/components/shared/RightSideBar";
 import BottomBar from "@/components/shared/BottomBar";
 import { dark, shadesOfPurple } from "@clerk/themes";
+import { syncUserFromClerk } from "@/lib/actions/user.actions";
 
 export const metadata: Metadata = {
   title: "PORTAL",
@@ -41,6 +42,14 @@ export default async function RootLayout({ children }:
       </>
     )
   }
+
+  await syncUserFromClerk({
+    userId: user.id,
+    email: user.emailAddresses[0]?.emailAddress ?? "",
+    username: user.username,
+    name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
+    image: user.imageUrl,
+  });
 
   return (
     <>

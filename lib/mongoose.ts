@@ -1,23 +1,48 @@
-'use server'
+'use server';
+
 import mongoose from 'mongoose';
 
-let isConnected: boolean = false;
+declare global {
+  var mongooseCache:
+    | {
+        conn: typeof mongoose | null;
+        promise: Promise<typeof mongoose> | null;
+      }
+    | undefined;
+}
 
-export const connectToDB = async (): Promise<void> => {
+const cache = global.mongooseCache ?? {
+  conn: null,
+  promise: null,
+};
+
+global.mongooseCache = cache;
+
+export const connectToDB = async (): Promise<typeof mongoose> => {
   mongoose.set('strictQuery', true);
 
-  if (!process.env.MONGODB_URL) return console.log('Missing Mongodb Url');
+  const mongodbUrl = process.env.MONGODB_URL;
+  if (!mongodbUrl) {
+    throw new Error('Missing MONGODB_URL');
+  }
 
-  if (isConnected) {
-    return console.log("MongoDB connection already istablished");
+  if (cache.conn) {
+    return cache.conn;
+  }
+
+  if (!cache.promise) {
+    cache.promise = mongoose.connect(mongodbUrl).then((instance) => {
+      console.log('MongoDB connected');
+      return instance;
+    });
   }
 
   try {
-    await mongoose.connect(process.env.MONGODB_URL as  string);
-
-    isConnected = true;
-    console.log('MongoDB connected');
-  } catch (err: any) {
-    console.log(`Error connecting to Database ${err.message}`)
+    cache.conn = await cache.promise;
+  } catch (error) {
+    cache.promise = null;
+    throw error;
   }
-}
+
+  return cache.conn;
+};

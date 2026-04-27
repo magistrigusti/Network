@@ -2,9 +2,9 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-  id: { type: String, required: true },
+  id: { type: String, required: true, unique: true, index: true },
   email: { type: String, required: true, unique: true },
-  username: { type: String, required: true, nique: true },
+  username: { type: String, required: true, unique: true },
   name: { type: String, required: true },
   image: String,
   bio: String,
@@ -26,6 +26,8 @@ const userSchema = new mongoose.Schema({
   groups: [
     { type: mongoose.Schema.Types.ObjectId, ref: 'Group'}
   ]
+}, {
+  timestamps: true,
 });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);

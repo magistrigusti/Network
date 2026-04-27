@@ -24,7 +24,7 @@ export const createGroup = async (
     }: createGroupParams 
   ) =>  {
     try {
-      connectToDB();
+      await connectToDB();
   
       // Find the user with the provided unique id
       const user = await User.findOne({ id: createdById });
@@ -57,7 +57,7 @@ export const createGroup = async (
     memberId: string
   ) => {
     try {
-      connectToDB();
+      await connectToDB();
   
       // Find the group by its unique id
       const group = await Group.findOne({ id: groupId });
@@ -100,7 +100,7 @@ export const createGroup = async (
     groupId: string
   ) => {
     try {
-      connectToDB();
+      await connectToDB();
   
       const userIdObject = await User.findOne({ id: userId }, { _id: 1 });
       const groupIdObject = await Group.findOne(
@@ -143,7 +143,7 @@ export const createGroup = async (
     image: string
   ) => {
     try {
-      connectToDB();
+      await connectToDB();
   
       // Find the group by its _id and update the information
       const updatedGroup = await Group.findOneAndUpdate(
@@ -165,7 +165,7 @@ export const createGroup = async (
 
   export const deleteGroup = async (groupId: string) => {
     try {
-      connectToDB();
+      await connectToDB();
   
       // Find the group by its ID and delete it
       const deletedGroup = await Group.findOneAndDelete({
@@ -209,7 +209,7 @@ export const createGroup = async (
     sortBy?: SortOrder;
   }) => {
     try {
-      connectToDB();
+      await connectToDB();
   
       // Calculate the number of groups to skip based on the page number and page size.
       const skipAmount = (pageNumber - 1) * pageSize;
@@ -255,7 +255,7 @@ export const createGroup = async (
 
   export const fetchGroupPosts = async (id: string) => {
     try {
-      connectToDB();
+      await connectToDB();
   
       const groupPosts = await Group.findById(id)
     .populate({
@@ -302,7 +302,7 @@ export const createGroup = async (
 
   export const fetchGroupDetails = async (id: string) => {
     try {
-      connectToDB();
+      await connectToDB();
   
       const groupDetails = await Group.findOne({ id }).populate([
         "createdBy",

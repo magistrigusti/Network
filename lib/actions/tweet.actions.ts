@@ -22,7 +22,7 @@ export const createTweet = async ({
     groupId
 }: TweetParams) => {
     try {
-        connectToDB()
+        await connectToDB()
         const groupIdObject = await Group.findOne({ id: groupId }, { _id: 1 });
         const createdTweet = await Tweet.create({
             text,
@@ -56,7 +56,7 @@ export const createTweet = async ({
 }
 
 export const fetchTweets = async (pageNumber = 1, pageSize = 20) => {
-    connectToDB();
+    await connectToDB();
   
     const skipAmount = (pageNumber - 1) * pageSize;
   
@@ -114,7 +114,7 @@ export const fetchTweets = async (pageNumber = 1, pageSize = 20) => {
     groupId,
   }: RetweetParams) => {
     try {
-      connectToDB();
+      await connectToDB();
       const user = await User.findById(userId);
       if (!user) throw new Error('User not found:');
   
@@ -148,7 +148,7 @@ export const fetchTweets = async (pageNumber = 1, pageSize = 20) => {
   export const isTweetByUser = async (userId: string, tweetId: string) => {
   
     try {
-      connectToDB();
+      await connectToDB();
   
       const tweet = await Tweet.findById(tweetId);
       if (!tweet) throw new Error('Tweet not found');
@@ -161,7 +161,7 @@ export const fetchTweets = async (pageNumber = 1, pageSize = 20) => {
 
   export const deleteTweet = async (userId: string, tweetId: string, path: string) => {
     try {
-      connectToDB();
+      await connectToDB();
   
       // Check if the tweet exists and if the user is the author
       const tweet = await Tweet.findById(tweetId);
@@ -246,7 +246,7 @@ export const fetchTweets = async (pageNumber = 1, pageSize = 20) => {
   };
 
   export const fetchTweetById = async (id: string) => {
-    connectToDB();
+    await connectToDB();
   
     try {
       const tweet = await Tweet.findById(id)
@@ -301,7 +301,7 @@ export const fetchTweets = async (pageNumber = 1, pageSize = 20) => {
     userId: string,
     path: string
   ) => {
-    connectToDB();
+    await connectToDB();
     try {
       const originalTweet = await Tweet.findById(tweetId);
       if (!originalTweet) throw new Error('Tweet Not Found!!!');

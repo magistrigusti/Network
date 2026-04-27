@@ -1,5 +1,5 @@
 import AccountInfo from "@/components/forms/AccountInfo"
-import { fetchUser } from "@/lib/actions/user.actions"
+import { syncUserFromClerk } from "@/lib/actions/user.actions"
 import { UserProfile } from "@clerk/nextjs"
 import { currentUser } from "@clerk/nextjs/server"
 import { shadesOfPurple } from "@clerk/themes"
@@ -8,7 +8,13 @@ import { redirect } from "next/navigation"
 const Page = async () => {
     const user = await currentUser()
     if(!user) return null
-    const userInfo = await fetchUser(user.id)
+    const userInfo = await syncUserFromClerk({
+        userId: user.id,
+        email: user.emailAddresses[0]?.emailAddress ?? "",
+        username: user.username,
+        name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
+        image: user.imageUrl,
+    })
     if(userInfo?.onboarded) redirect('/')
     
     const userData = {

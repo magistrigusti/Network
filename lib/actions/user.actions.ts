@@ -8,12 +8,108 @@ import Tweet from "../models/tweet.model";
 import Group from "../models/group.model";
 
 interface CreateUserParams {
-  userId: String;
-  email: String;
-  username: String;
-  name: String;
-  image: String;
+  userId: string;
+  email: string;
+  username?: string | null;
+  name?: string | null;
+  image?: string | null;
 }
+
+const USERNAME_LIMIT = 24;
+
+const normalizeUsername = (value: string) => {
+  const normalized = value
+    .toLowerCase()
+    .replace(/[^a-z0-9_]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .replace(/_+/g, "_")
+    .slice(0, USERNAME_LIMIT);
+
+  return normalized;
+};
+
+const buildUsernameSeed = ({
+  email,
+  username,
+  userId,
+}: Pick<CreateUserParams, "email" | "username" | "userId">) => {
+  const emailPrefix = email.split("@")[0] ?? "";
+  const fallback = `user_${userId.slice(-8).toLowerCase()}`;
+
+  return (
+    normalizeUsername(username ?? "") ||
+    normalizeUsername(emailPrefix) ||
+    normalizeUsername(fallback) ||
+    "portal_user"
+  );
+};
+
+const resolveUniqueUsername = async (base: string, userId: string) => {
+  let suffix = 0;
+
+  while (true) {
+    const candidate =
+      suffix === 0
+        ? base
+        : `${base.slice(0, Math.max(3, USERNAME_LIMIT - String(suffix).length - 1))}_${suffix}`;
+
+    const existingUser = await User.findOne({ username: candidate });
+    if (!existingUser || existingUser.id === userId) {
+      return candidate;
+    }
+
+    suffix += 1;
+  }
+};
+
+export const syncUserFromClerk = async ({
+  userId,
+  email,
+  name,
+  username,
+  image,
+}: CreateUserParams) => {
+  await connectToDB();
+
+  if (!email) {
+    throw new Error("Email is required to sync Clerk user");
+  }
+
+  const existingUser = await User.findOne({ id: userId });
+  const resolvedUsername =
+    existingUser?.username ??
+    (await resolveUniqueUsername(
+      buildUsernameSeed({ email, username, userId }),
+      userId
+    ));
+
+  const resolvedName =
+    existingUser?.name ||
+    name?.trim() ||
+    resolvedUsername;
+
+  const resolvedImage = image || existingUser?.image || "";
+
+  return User.findOneAndUpdate(
+    { id: userId },
+    {
+      $set: {
+        email,
+        name: resolvedName,
+        image: resolvedImage,
+        username: resolvedUsername,
+      },
+      $setOnInsert: {
+        onboarded: false,
+      },
+    },
+    {
+      upsert: true,
+      new: true,
+      setDefaultsOnInsert: true,
+    }
+  );
+};
 
 export const createUser = async ({
   userId,
@@ -23,12 +119,11 @@ export const createUser = async ({
   image,
 }: CreateUserParams): Promise<void> => {
   try {
-    connectToDB();
-    await User.create({
-      id: userId,
-      username: username?.toLowerCase(),
-      name,
+    await syncUserFromClerk({
+      userId,
       email,
+      name,
+      username,
       image,
     });
   } catch (err: any) {
@@ -38,7 +133,7 @@ export const createUser = async ({
 
 export const fetchUser = async (userId: string) => {
   try {
-    connectToDB();
+    await connectToDB();
 
     return await User.findOne({
       id: userId,
@@ -68,7 +163,7 @@ export const updateUser = async ({
   image,
 }: updateUserParams): Promise<void> => {
   try {
-    connectToDB();
+    await connectToDB();
     await User.findOneAndUpdate(
       { id: userId },
       {
@@ -102,7 +197,7 @@ export const fetchUsers = async ({
   sortBy?: SortOrder;
 }) => {
   try {
-    connectToDB();
+    await connectToDB();
     const skipAmount = (pageNumber - 1) * pageSize;
     const regex = new RegExp(searchString, "i");
     const query: FilterQuery<typeof User> = {
@@ -139,7 +234,7 @@ export async function likeOrDislikeTweet(
   path: string
 ) {
   try {
-    connectToDB();
+    await connectToDB();
 
     // Find the user and check if they have already liked the tweet
     const user = await User.findOne({ id: userId });
@@ -188,7 +283,7 @@ export async function likeOrDislikeTweet(
 
 export const fetchUserPosts = async (userId: string) => {
   try {
-    connectToDB();
+    await connectToDB();
 
     // Find all tweets authored by the user with the given userId
     const tweets = await User.findOne({ id: userId }).populate({
@@ -231,7 +326,7 @@ export const fetchUserPosts = async (userId: string) => {
 
 export const fetchUserReplies = async (userId: string) => {
   try {
-    connectToDB();
+    await connectToDB();
 
     // Find all replies authored by the user with the given userId
     const replies = await User.findOne({ id: userId }).populate({
@@ -263,7 +358,7 @@ export const fetchUserReplies = async (userId: string) => {
 
 export const getActivity = async (userId: string) => {
   try {
-    connectToDB();
+    await connectToDB();
 
     // Find all tweets created by the user
     const userTweets = await Tweet.find({ author: userId });

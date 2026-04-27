@@ -32,10 +32,11 @@ const AccountInfo = ( { user }: Props )  => {
     const [ showBio, setShowBio ] = useState(false)
 
     useEffect(() => {
-        setTimeout(() => {
+        const timer = setTimeout(() => {
             setShowBio(true)
         }, 1000)
-    })
+        return () => clearTimeout(timer)
+    }, [])
     
 
     const form = useForm< z.infer< typeof UserValidation> >({

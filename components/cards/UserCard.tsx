@@ -3,6 +3,8 @@
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "../ui/button"
+import { useAuth } from "@clerk/nextjs"
+import StartConversationButton from "../messages/StartConversationButton"
 
 interface Props {
   id: string,
@@ -18,6 +20,8 @@ const UserCard = ({
   imgUrl
 }: Props) => {
   const router = useRouter()
+  const { userId } = useAuth()
+
   return (
     <>
       <article className="user-card">
@@ -41,13 +45,22 @@ const UserCard = ({
 
         </div>
 
-        <Button
-          className="user-card_btn"
-          onClick={() => {
-            router.push(`/profile/${id}`)
-          }}>
-          View
-        </Button>
+        <div className="flex gap-2">
+          {userId && userId !== id && (
+            <StartConversationButton
+              currentUserId={userId}
+              targetUserId={id}
+              compact
+            />
+          )}
+          <Button
+            className="user-card_btn"
+            onClick={() => {
+              router.push(`/profile/${id}`)
+            }}>
+            View
+          </Button>
+        </div>
       </article>
     </>
   )

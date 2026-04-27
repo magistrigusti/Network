@@ -14,17 +14,16 @@ const BottomBar = () => {
       <section className="bottombar">
         <div className="bottombar_container">
           {sidebarLinks.map(( link ) => {
+            const route = link.route === '/profile'
+              ? `${link.route}/${userId}`
+              : link.route;
             const isActive = (
-              pathname.includes(link.route) && pathname === link.route 
+              pathname.includes(link.route) && pathname === link.route
             );
-
-            if (link.route === '/profile') {
-              link.route = `${link.route}/${userId}`
-            }
 
             return (
               <Link className={`bottombar_link ${isActive && 'bg-primary-500'}`}
-                href={link.route}
+                href={route}
                 key={link.label}
               >
                 <Image src={link.imgURL} alt={link.label} 
