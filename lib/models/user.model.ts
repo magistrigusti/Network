@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true, index: true },
   email: { type: String, required: true, unique: true },
+  authProvider: { type: String, enum: ['clerk', 'telegram'], default: 'clerk' },
+  telegramId: { type: String, unique: true, sparse: true },
   username: { type: String, required: true, unique: true },
   name: { type: String, required: true },
   image: String,

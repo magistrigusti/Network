@@ -3,7 +3,7 @@ import LandingPage from '@/components/shared/LandingPage'
 import Pagination from '@/components/shared/Pagination';
 import { fetchTweets, isTweetByUser } from '@/lib/actions/tweet.actions';
 import { fetchUser } from '@/lib/actions/user.actions'
-import { currentUser } from '@clerk/nextjs/server'
+import { getCurrentPortalUser } from '@/lib/auth/session';
 import { redirect } from 'next/navigation'
 
 
@@ -12,7 +12,7 @@ export default async function Home({
 }: {
   searchParams: { [key: string]: string | undefined };
 }) {
-  const user = await currentUser()
+  const user = await getCurrentPortalUser()
   if (!user) {
     return (
       <>

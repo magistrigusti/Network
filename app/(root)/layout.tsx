@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "../globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Inter } from "next/font/google";
-import { currentUser } from "@clerk/nextjs/server";
 import TopBar from "@/components/shared/TopBar";
 import LeftSideBar from "@/components/shared/LeftSideBar";
 import RightSideBar from "@/components/shared/RightSideBar";
 import BottomBar from "@/components/shared/BottomBar";
 import { dark, shadesOfPurple } from "@clerk/themes";
 import { syncUserFromClerk } from "@/lib/actions/user.actions";
+import { getCurrentPortalUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
   title: "PORTAL",
@@ -24,7 +24,7 @@ export default async function RootLayout({ children }:
     children: React.ReactNode
   }>
 ) {
-  const user = await currentUser()
+  const user = await getCurrentPortalUser()
   if (!user) {
     return (
       <>
@@ -43,13 +43,15 @@ export default async function RootLayout({ children }:
     )
   }
 
-  await syncUserFromClerk({
-    userId: user.id,
-    email: user.emailAddresses[0]?.emailAddress ?? "",
-    username: user.username,
-    name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
-    image: user.imageUrl,
-  });
+  if (user.authProvider === "clerk") {
+    await syncUserFromClerk({
+      userId: user.id,
+      email: user.emailAddress,
+      username: user.username,
+      name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
+      image: user.imageUrl,
+    });
+  }
 
   return (
     <>
@@ -64,7 +66,7 @@ export default async function RootLayout({ children }:
               <TopBar />
 
               <main className='flex'>
-                <LeftSideBar />
+                <LeftSideBar currentUserId={user.id} />
 
                 <section className='main-container'>
                   <div className='w-full max-w-4xl'>
@@ -72,10 +74,10 @@ export default async function RootLayout({ children }:
                   </div>
                 </section>
 
-                <RightSideBar />
+                <RightSideBar currentUserId={user.id} />
               </main>
 
-              <BottomBar />
+              <BottomBar currentUserId={user.id} />
             </main>
           </body>
         </ClerkProvider>

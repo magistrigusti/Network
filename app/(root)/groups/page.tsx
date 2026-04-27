@@ -1,11 +1,11 @@
 import GroupCard from "@/components/cards/GroupCard"
 import { fetchGroups } from "@/lib/actions/group.actions"
 import { fetchUser } from "@/lib/actions/user.actions"
-import { currentUser } from "@clerk/nextjs/server"
+import { getCurrentPortalUser } from "@/lib/auth/session"
 import { redirect } from "next/navigation"
 
 const Page = async () => {
-  const user = await currentUser()
+  const user = await getCurrentPortalUser()
   if (!user) return null
 
   const userInfo = await fetchUser(user.id)

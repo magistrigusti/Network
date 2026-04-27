@@ -1,15 +1,15 @@
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 import { fetchUser } from "@/lib/actions/user.actions";
 import AccountInfo from "@/components/forms/AccountInfo";
 import { UserProfile } from "@clerk/nextjs";
 import { shadesOfPurple } from '@clerk/themes'
+import { getCurrentPortalUser } from "@/lib/auth/session";
 
 
 
 async function Page() {
-  const user = await currentUser();
+  const user = await getCurrentPortalUser();
   if (!user) return null;
 
   const userInfo = await fetchUser(user.id);
@@ -28,7 +28,7 @@ async function Page() {
     <>
       <h1 className='head-text'>Edit Profile</h1>
 
-      
+      {user.authProvider === "clerk" && (
       <div className="mt-10 " >
                 <UserProfile
                     appearance={{
@@ -37,6 +37,7 @@ async function Page() {
                     routing="hash"
                 />
         </div>
+      )}
 
       <section className='mt-12'>
         <AccountInfo user={userData} />

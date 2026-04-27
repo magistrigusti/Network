@@ -3,24 +3,24 @@
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "../ui/button"
-import { useAuth } from "@clerk/nextjs"
 import StartConversationButton from "../messages/StartConversationButton"
 
 interface Props {
   id: string,
   name: string,
   username: string,
-  imgUrl: string
+  imgUrl: string,
+  currentUserId?: string
 }
 
 const UserCard = ({
   id,
   name,
   username,
-  imgUrl
+  imgUrl,
+  currentUserId
 }: Props) => {
   const router = useRouter()
-  const { userId } = useAuth()
 
   return (
     <>
@@ -46,9 +46,9 @@ const UserCard = ({
         </div>
 
         <div className="flex gap-2">
-          {userId && userId !== id && (
+          {currentUserId && currentUserId !== id && (
             <StartConversationButton
-              currentUserId={userId}
+              currentUserId={currentUserId}
               targetUserId={id}
               compact
             />

@@ -1,11 +1,11 @@
 import { fetchUser, getActivity } from "@/lib/actions/user.actions"
-import { currentUser } from "@clerk/nextjs/server"
+import { getCurrentPortalUser } from "@/lib/auth/session"
 import Image from "next/image"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 
 const Page = async () => {
-  const user = await currentUser()
+  const user = await getCurrentPortalUser()
   if (!user) return null
 
   const userInfo = await fetchUser(user.id)

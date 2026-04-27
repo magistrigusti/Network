@@ -3,11 +3,9 @@ import { sidebarLinks } from '@/constants'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAuth } from '@clerk/nextjs';
 
-const BottomBar = () => {
+const BottomBar = ({ currentUserId }: { currentUserId: string }) => {
   const pathname = usePathname();
-  const { userId } = useAuth();
 
   return (
     <>
@@ -15,7 +13,7 @@ const BottomBar = () => {
         <div className="bottombar_container">
           {sidebarLinks.map(( link ) => {
             const route = link.route === '/profile'
-              ? `${link.route}/${userId}`
+              ? `${link.route}/${currentUserId}`
               : link.route;
             const isActive = (
               pathname.includes(link.route) && pathname === link.route

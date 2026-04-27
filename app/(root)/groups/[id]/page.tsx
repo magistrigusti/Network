@@ -1,6 +1,6 @@
 import ProfileHeader from "@/components/shared/ProfileHeader";
 import { fetchGroupDetails } from "@/lib/actions/group.actions";
-import { currentUser } from "@clerk/nextjs/server";
+import { getCurrentPortalUser } from "@/lib/auth/session";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { groupTabs } from "@/constants";
 import Image from "next/image";
@@ -9,7 +9,7 @@ import UserCard from "@/components/cards/UserCard";
 
 
 const Page = async ({ params }: { params: { id: string } }) => {
-  const user = await currentUser();
+  const user = await getCurrentPortalUser();
   if (!user) return null;
 
   const groupDetails = await fetchGroupDetails(params.id);
@@ -75,6 +75,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
                   name={member.name}
                   username={member.username}
                   imgUrl={member.image}
+                  currentUserId={user.id}
                 />
               ))}
             </section>

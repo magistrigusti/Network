@@ -1,20 +1,20 @@
 import AccountInfo from "@/components/forms/AccountInfo"
 import { syncUserFromClerk } from "@/lib/actions/user.actions"
 import { UserProfile } from "@clerk/nextjs"
-import { currentUser } from "@clerk/nextjs/server"
 import { shadesOfPurple } from "@clerk/themes"
 import { redirect } from "next/navigation"
+import { getCurrentPortalUser } from "@/lib/auth/session"
 
 const Page = async () => {
-    const user = await currentUser()
+    const user = await getCurrentPortalUser()
     if(!user) return null
-    const userInfo = await syncUserFromClerk({
+    const userInfo = user.authProvider === "clerk" ? await syncUserFromClerk({
         userId: user.id,
-        email: user.emailAddresses[0]?.emailAddress ?? "",
+        email: user.emailAddress,
         username: user.username,
         name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
         image: user.imageUrl,
-    })
+    }) : await import("@/lib/actions/user.actions").then(({ fetchUser }) => fetchUser(user.id))
     if(userInfo?.onboarded) redirect('/')
     
     const userData = {
@@ -35,6 +35,7 @@ const Page = async () => {
                         Complete your profile now to use Twiddle</p>
                 </div>
 
+                {user.authProvider === "clerk" && (
                 <div className="mt-10">
                     <UserProfile
                         appearance={{
@@ -43,6 +44,7 @@ const Page = async () => {
                         //routing="hash"
                     />
                 </div>
+                )}
 
                 <AccountInfo
                     user={userData}

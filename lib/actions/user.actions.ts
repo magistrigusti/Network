@@ -15,6 +15,14 @@ interface CreateUserParams {
   image?: string | null;
 }
 
+interface SyncTelegramUserParams {
+  telegramId: string;
+  firstName: string;
+  lastName?: string | null;
+  username?: string | null;
+  photoUrl?: string | null;
+}
+
 const USERNAME_LIMIT = 24;
 
 const normalizeUsername = (value: string) => {
@@ -95,9 +103,57 @@ export const syncUserFromClerk = async ({
     {
       $set: {
         email,
+        authProvider: "clerk",
         name: resolvedName,
         image: resolvedImage,
         username: resolvedUsername,
+      },
+      $setOnInsert: {
+        onboarded: false,
+      },
+    },
+    {
+      upsert: true,
+      new: true,
+      setDefaultsOnInsert: true,
+    }
+  );
+};
+
+export const syncUserFromTelegram = async ({
+  telegramId,
+  firstName,
+  lastName,
+  username,
+  photoUrl,
+}: SyncTelegramUserParams) => {
+  await connectToDB();
+
+  const userId = `telegram:${telegramId}`;
+  const email = `telegram_${telegramId}@portal.local`;
+  const existingUser = await User.findOne({ id: userId });
+  const resolvedUsername =
+    existingUser?.username ??
+    (await resolveUniqueUsername(
+      normalizeUsername(username ?? "") ||
+        normalizeUsername(`${firstName}_${telegramId}`) ||
+        `telegram_${telegramId}`,
+      userId
+    ));
+
+  const name = [firstName, lastName].filter(Boolean).join(" ").trim();
+
+  return User.findOneAndUpdate(
+    { id: userId },
+    {
+      $set: {
+        id: userId,
+        email,
+        authProvider: "telegram",
+        telegramId,
+        username: resolvedUsername,
+        name: existingUser?.name || name || resolvedUsername,
+        image: photoUrl || existingUser?.image || "/images/logo.png",
       },
       $setOnInsert: {
         onboarded: false,

@@ -1,16 +1,16 @@
 import ProfileHeader from "@/components/shared/ProfileHeader"
 import { fetchUser } from "@/lib/actions/user.actions"
-import { currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { profileTabs } from "@/constants";
 import Image from "next/image";
 import TweetsTab from "@/components/shared/TweetsTab";
 import RepliesTab from "@/components/shared/RepliesTab";
+import { getCurrentPortalUser } from "@/lib/auth/session";
 
 
 const Page = async ({ params }: { params: { id: string } }) => {
-  const user = await currentUser()
+  const user = await getCurrentPortalUser()
   if (!user) return null
 
   const userInfo = await fetchUser(params.id)

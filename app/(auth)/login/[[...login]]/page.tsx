@@ -1,9 +1,13 @@
 import { SignIn } from "@clerk/nextjs";
+import TelegramLoginButton from "@/components/auth/TelegramLoginButton";
 
 const Page = () => {
   return (
     <>
-      <SignIn />
+      <div className="flex flex-col items-center gap-5">
+        <SignIn />
+        <TelegramLoginButton />
+      </div>
     </>
   )
 }

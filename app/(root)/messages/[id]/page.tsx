@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import MessageComposer from "@/components/messages/MessageComposer";
 import { fetchConversation } from "@/lib/actions/message.actions";
 import { fetchUser } from "@/lib/actions/user.actions";
+import { getCurrentPortalUser } from "@/lib/auth/session";
 
 const formatBubbleTime = (value: string) =>
   new Intl.DateTimeFormat("en", {
@@ -13,7 +13,7 @@ const formatBubbleTime = (value: string) =>
   }).format(new Date(value));
 
 const Page = async ({ params }: { params: { id: string } }) => {
-  const user = await currentUser();
+  const user = await getCurrentPortalUser();
   if (!user) return null;
 
   const userInfo = await fetchUser(user.id);

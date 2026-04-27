@@ -1,15 +1,11 @@
 import { fetchUsers } from "@/lib/actions/user.actions"
-import { currentUser } from "@clerk/nextjs/server"
 import UserCard from "../cards/UserCard"
 import { fetchGroups } from "@/lib/actions/group.actions"
 import GroupCard from "../cards/GroupCard"
 
-const RightSideBar = async () => {
-    const user = await currentUser()
-    if(!user) return null
-
+const RightSideBar = async ({ currentUserId }: { currentUserId: string }) => {
     const similarMinds = await fetchUsers({
-        userId: user.id,
+        userId: currentUserId,
         pageSize: 4
     })
 
@@ -69,6 +65,7 @@ const RightSideBar = async () => {
                                             name = { person.name }
                                             username = { person.username }
                                             imgUrl = { person.image }
+                                            currentUserId={currentUserId}
                                         />
                                     ) }
                                 </>

@@ -1,5 +1,6 @@
 import { SignInButton, SignUpButton } from "@clerk/nextjs"
 import Image from "next/image"
+import TelegramLoginButton from "../auth/TelegramLoginButton"
 
 const LandingPage = () => {
   return (
@@ -36,6 +37,14 @@ const LandingPage = () => {
               Register
             </button>
           </SignUpButton>
+
+          <div className="my-4 flex w-full items-center gap-3">
+            <div className="h-px flex-1 bg-dark-4" />
+            <span className="text-small-medium text-light-4">or</span>
+            <div className="h-px flex-1 bg-dark-4" />
+          </div>
+
+          <TelegramLoginButton />
         </div>
       </div>
     </>

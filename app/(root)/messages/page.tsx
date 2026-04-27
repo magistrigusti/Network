@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { fetchConversations } from "@/lib/actions/message.actions";
 import { fetchUser } from "@/lib/actions/user.actions";
+import { getCurrentPortalUser } from "@/lib/auth/session";
 
 const formatMessageTime = (value: string) =>
   new Intl.DateTimeFormat("en", {
@@ -14,7 +14,7 @@ const formatMessageTime = (value: string) =>
   }).format(new Date(value));
 
 const Page = async () => {
-  const user = await currentUser();
+  const user = await getCurrentPortalUser();
   if (!user) return null;
 
   const userInfo = await fetchUser(user.id);

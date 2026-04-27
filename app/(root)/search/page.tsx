@@ -4,15 +4,15 @@ import Pagination from "@/components/shared/Pagination";
 import SearchBar from "@/components/shared/SearchBar";
 import { fetchGroups } from "@/lib/actions/group.actions";
 import { fetchUser, fetchUsers } from "@/lib/actions/user.actions";
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getCurrentPortalUser } from "@/lib/auth/session";
 
 const Page = async ({
     searchParams,
   }: {
     searchParams: { [key: string]: string | undefined };
   }) => {
-    const user = await currentUser();
+    const user = await getCurrentPortalUser();
     if (!user) return null;
 
     const userInfo = await fetchUser(user.id);
@@ -50,6 +50,7 @@ const Page = async ({
                 name={person.name}
                 username={person.username}
                 imgUrl={person.image}
+                currentUserId={user.id}
               />
             ))}
           </>
