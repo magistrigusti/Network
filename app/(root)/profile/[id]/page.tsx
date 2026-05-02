@@ -7,6 +7,7 @@ import Image from "next/image";
 import TweetsTab from "@/components/shared/TweetsTab";
 import RepliesTab from "@/components/shared/RepliesTab";
 import { getCurrentPortalUser } from "@/lib/auth/session";
+import { getFriendshipStatus } from "@/lib/actions/friend.actions";
 
 
 const Page = async ({ params }: { params: { id: string } }) => {
@@ -14,8 +15,9 @@ const Page = async ({ params }: { params: { id: string } }) => {
   if (!user) return null
 
   const userInfo = await fetchUser(params.id)
-
   if (!userInfo?.onboarded) redirect('/onboarding')
+
+  const friendshipStatus = await getFriendshipStatus(user.id, userInfo.id)
   return (
     <>
       <section>
@@ -27,6 +29,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
           imgUrl={userInfo.image}
           bio={userInfo.bio}
           type='User'
+          friendshipStatus={friendshipStatus}
         />
 
 

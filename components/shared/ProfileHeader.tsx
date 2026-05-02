@@ -4,6 +4,8 @@ import Image from "next/image"
 import { Button } from "../ui/button"
 import { useRouter } from "next/navigation"
 import StartConversationButton from "../messages/StartConversationButton"
+import FriendActionButton from "../friends/FriendActionButton"
+import { FriendshipStatus } from "@/lib/actions/friend.actions"
 
 interface Props {
   accountId: string,
@@ -13,9 +15,10 @@ interface Props {
   imgUrl: string,
   bio: string,
   type?: 'User' | 'Group',
+  friendshipStatus?: FriendshipStatus,
 }
 
-const ProfileHeader = ({ accountId, authUserId, name, username, imgUrl, bio, type }: Props) => {
+const ProfileHeader = ({ accountId, authUserId, name, username, imgUrl, bio, type, friendshipStatus = "none" }: Props) => {
   const router = useRouter()
 
   return (
@@ -55,7 +58,12 @@ const ProfileHeader = ({ accountId, authUserId, name, username, imgUrl, bio, typ
         )}
 
         {accountId !== authUserId && type === 'User' && (
-          <div className="mt-5">
+          <div className="mt-5 flex flex-wrap gap-3">
+            <FriendActionButton
+              currentUserId={authUserId}
+              targetUserId={accountId}
+              status={friendshipStatus}
+            />
             <StartConversationButton
               currentUserId={authUserId}
               targetUserId={accountId}

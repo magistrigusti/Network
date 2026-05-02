@@ -20,6 +20,11 @@ export const sidebarLinks = [
       label: "Messages",
     },
     {
+      imgURL: "/assets/friends.svg",
+      route: "/friends",
+      label: "Friends",
+    },
+    {
       imgURL: "/assets/tweet.svg",
       route: "/create-tweet",
       label: "Tweet",
