@@ -30,7 +30,11 @@ export const GET = async (request: NextRequest) => {
       photoUrl: telegramUser.photo_url,
     });
 
-    const response = NextResponse.redirect(new URL("/", request.url));
+    const response = NextResponse.redirect(
+      request.cookies.get("portal_sso_return_to")?.value
+        ? new URL("/api/auth/portal-sso/complete", request.url)
+        : new URL("/", request.url)
+    );
     response.cookies.set(TELEGRAM_SESSION_COOKIE, createTelegramSessionValue(user.id), {
       httpOnly: true,
       sameSite: "lax",
