@@ -21,6 +21,11 @@ interface SyncTelegramUserParams {
   lastName?: string | null;
   username?: string | null;
   photoUrl?: string | null;
+  wallets?: {
+    ton?: string[];
+    solana?: string[];
+    ethereum?: string[];
+  };
 }
 
 const USERNAME_LIMIT = 24;
@@ -34,6 +39,16 @@ const normalizeUsername = (value: string) => {
     .slice(0, USERNAME_LIMIT);
 
   return normalized;
+};
+
+const cleanWalletList = (wallets?: string[]) => {
+  return Array.from(
+    new Set(
+      (wallets ?? [])
+        .map((wallet) => wallet.trim())
+        .filter(Boolean)
+    )
+  );
 };
 
 const buildUsernameSeed = ({
@@ -126,6 +141,7 @@ export const syncUserFromTelegram = async ({
   lastName,
   username,
   photoUrl,
+  wallets,
 }: SyncTelegramUserParams) => {
   await connectToDB();
 
@@ -142,23 +158,45 @@ export const syncUserFromTelegram = async ({
     ));
 
   const name = [firstName, lastName].filter(Boolean).join(" ").trim();
+  const walletAddToSet: Record<string, { $each: string[] }> = {};
+  const tonWallets = cleanWalletList(wallets?.ton);
+  const solanaWallets = cleanWalletList(wallets?.solana);
+  const ethereumWallets = cleanWalletList(wallets?.ethereum);
+
+  if (tonWallets.length > 0) {
+    walletAddToSet.tonWallets = { $each: tonWallets };
+  }
+
+  if (solanaWallets.length > 0) {
+    walletAddToSet.solanaWallets = { $each: solanaWallets };
+  }
+
+  if (ethereumWallets.length > 0) {
+    walletAddToSet.ethereumWallets = { $each: ethereumWallets };
+  }
+
+  const update: Record<string, unknown> = {
+    $set: {
+      id: userId,
+      email,
+      authProvider: "telegram",
+      telegramId,
+      username: resolvedUsername,
+      name: existingUser?.name || name || resolvedUsername,
+      image: photoUrl || existingUser?.image || "/images/logo.png",
+    },
+    $setOnInsert: {
+      onboarded: false,
+    },
+  };
+
+  if (Object.keys(walletAddToSet).length > 0) {
+    update.$addToSet = walletAddToSet;
+  }
 
   return User.findOneAndUpdate(
     { id: userId },
-    {
-      $set: {
-        id: userId,
-        email,
-        authProvider: "telegram",
-        telegramId,
-        username: resolvedUsername,
-        name: existingUser?.name || name || resolvedUsername,
-        image: photoUrl || existingUser?.image || "/images/logo.png",
-      },
-      $setOnInsert: {
-        onboarded: false,
-      },
-    },
+    update,
     {
       upsert: true,
       new: true,
